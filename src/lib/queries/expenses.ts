@@ -82,3 +82,38 @@ export function deleteExpense(id: number): boolean {
   const result = db.prepare("DELETE FROM expenses WHERE id = ?").run(id);
   return result.changes > 0;
 }
+
+export function expenseExists(date: string, amount_cents: number, description: string | null): boolean {
+  const row = db
+    .prepare("SELECT 1 FROM expenses WHERE date = ? AND amount_cents = ? AND description IS ? LIMIT 1")
+    .get(date, amount_cents, description ?? null);
+  return row !== undefined;
+}
+
+export function createExpenses(inputs: CreateExpenseInput[]): Expense[] {
+  const insert = db.prepare(
+    `INSERT INTO expenses (amount_cents, category_id, description, date, payment_method)
+     VALUES (?, ?, ?, ?, ?)`
+  );
+
+  const insertMany = db.transaction((rows: CreateExpenseInput[]) => {
+    const ids: number[] = [];
+    for (const row of rows) {
+      const result = insert.run(
+        row.amount_cents,
+        row.category_id,
+        row.description ?? null,
+        row.date,
+        row.payment_method ?? null
+      );
+      ids.push(Number(result.lastInsertRowid));
+    }
+    return ids;
+  });
+
+  const ids = insertMany(inputs);
+  if (ids.length === 0) return [];
+
+  const placeholders = ids.map(() => "?").join(",");
+  return db.prepare(`SELECT * FROM expenses WHERE id IN (${placeholders})`).all(...ids) as Expense[];
+}

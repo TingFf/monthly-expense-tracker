@@ -25,4 +25,5 @@ INSERT OR IGNORE INTO categories (name, color, icon, is_default) VALUES
   ('Food', '#F59E0B', '🍔', 1),
   ('Transport', '#3B82F6', '🚌', 1),
   ('Subscriptions', '#8B5CF6', '📺', 1),
-  ('Utilities', '#10B981', '💡', 1);
+  ('Utilities', '#10B981', '💡', 1),
+  ('Etc', '#94A3B8', '🗂️', 1);
