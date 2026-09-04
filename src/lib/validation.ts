@@ -23,6 +23,11 @@ export const createCategorySchema = z.object({
 
 export const updateCategorySchema = createCategorySchema.partial();
 
+export const setIncomeSchema = z.object({
+  month: z.string().regex(/^\d{4}-\d{2}$/, "Month must be in YYYY-MM format"),
+  amount_cents: z.number().int().nonnegative(),
+});
+
 export const importCommitSchema = z.object({
   items: z.array(createExpenseSchema).min(1).max(1000),
 });
@@ -32,3 +37,4 @@ export type UpdateExpenseInput = z.infer<typeof updateExpenseSchema>;
 export type CreateCategoryInput = z.infer<typeof createCategorySchema>;
 export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>;
 export type ImportCommitInput = z.infer<typeof importCommitSchema>;
+export type SetIncomeInput = z.infer<typeof setIncomeSchema>;

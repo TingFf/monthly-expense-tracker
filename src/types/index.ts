@@ -50,3 +50,10 @@ export interface MonthlyTrendEntry {
   month: string; // 'YYYY-MM'
   total_cents: number;
 }
+
+export interface MonthlyIncome {
+  month: string; // 'YYYY-MM'
+  amount_cents: number;
+  created_at: string;
+  updated_at: string;
+}

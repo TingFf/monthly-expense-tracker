@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { getMonthlySummary } from "@/lib/queries/summary";
 import { listExpenses } from "@/lib/queries/expenses";
+import { getMonthlyIncome } from "@/lib/queries/income";
 import { centsToDisplay, currentMonth, monthLabel, shiftMonth } from "@/lib/utils";
 import CategoryPieChart from "@/components/charts/CategoryPieChart";
 import CategoryBadge from "@/components/categories/CategoryBadge";
+import IncomeForm from "@/components/income/IncomeForm";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +21,9 @@ export default async function DashboardPage({
   const summary = getMonthlySummary(month);
   const monthExpenses = listExpenses({ month });
   const recentExpenses = monthExpenses.slice(0, 5);
+  const income = getMonthlyIncome(month);
+  const incomeCents = income?.amount_cents ?? 0;
+  const savingsCents = incomeCents - summary.total_cents;
 
   return (
     <div className="space-y-6">
@@ -64,9 +69,33 @@ export default async function DashboardPage({
         </Link>
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white p-6">
-        <p className="text-sm text-gray-500">Total spent this month</p>
-        <p className="text-3xl font-semibold mt-1">${centsToDisplay(summary.total_cents)}</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="rounded-xl border border-gray-200 bg-white p-6">
+          <p className="text-sm text-gray-500">Salary this month</p>
+          <p className="text-3xl font-semibold mt-1">${centsToDisplay(incomeCents)}</p>
+          <div className="mt-2">
+            <IncomeForm month={month} amountCents={incomeCents} />
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-gray-200 bg-white p-6">
+          <p className="text-sm text-gray-500">Total spent this month</p>
+          <p className="text-3xl font-semibold mt-1">${centsToDisplay(summary.total_cents)}</p>
+        </div>
+
+        <div className="rounded-xl border border-gray-200 bg-white p-6">
+          <p className="text-sm text-gray-500">Saved this month</p>
+          <p
+            className={`text-3xl font-semibold mt-1 ${
+              savingsCents < 0 ? "text-red-600" : "text-green-600"
+            }`}
+          >
+            {savingsCents < 0 ? "-" : ""}${centsToDisplay(Math.abs(savingsCents))}
+          </p>
+          {incomeCents === 0 && (
+            <p className="text-xs text-gray-400 mt-1">Set a salary to see savings</p>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

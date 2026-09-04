@@ -21,6 +21,13 @@ CREATE TABLE IF NOT EXISTS expenses (
 CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses(date);
 CREATE INDEX IF NOT EXISTS idx_expenses_category ON expenses(category_id);
 
+CREATE TABLE IF NOT EXISTS monthly_income (
+  month         TEXT PRIMARY KEY, -- 'YYYY-MM'
+  amount_cents  INTEGER NOT NULL,
+  created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 INSERT OR IGNORE INTO categories (name, color, icon, is_default) VALUES
   ('Food', '#F59E0B', '🍔', 1),
   ('Transport', '#3B82F6', '🚌', 1),
