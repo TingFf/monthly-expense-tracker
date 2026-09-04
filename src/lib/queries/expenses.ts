@@ -83,6 +83,11 @@ export function deleteExpense(id: number): boolean {
   return result.changes > 0;
 }
 
+export function deleteExpensesByMonth(month: string): number {
+  const result = db.prepare("DELETE FROM expenses WHERE date LIKE ?").run(`${month}-%`);
+  return result.changes;
+}
+
 export function expenseExists(date: string, amount_cents: number, description: string | null): boolean {
   const row = db
     .prepare("SELECT 1 FROM expenses WHERE date = ? AND amount_cents = ? AND description IS ? LIMIT 1")

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { createExpense, listExpenses } from "@/lib/queries/expenses";
+import { createExpense, deleteExpensesByMonth, listExpenses } from "@/lib/queries/expenses";
 import { createExpenseSchema } from "@/lib/validation";
 
 export const runtime = "nodejs";
@@ -30,4 +30,18 @@ export async function POST(request: NextRequest) {
 
   const expense = createExpense(parsed.data);
   return NextResponse.json(expense, { status: 201 });
+}
+
+export async function DELETE(request: NextRequest) {
+  const month = request.nextUrl.searchParams.get("month");
+
+  if (!month || !/^\d{4}-\d{2}$/.test(month)) {
+    return NextResponse.json(
+      { error: "A month query param in YYYY-MM format is required." },
+      { status: 400 }
+    );
+  }
+
+  const deleted_count = deleteExpensesByMonth(month);
+  return NextResponse.json({ deleted_count });
 }
