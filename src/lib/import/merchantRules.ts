@@ -23,6 +23,7 @@ export const MERCHANT_RULES: MerchantRule[] = [
       "GRAB", "GOJEK", "COMFORTDELGRO", "CDG ZIG", "SMRT", "SBS TRANSIT", "EZ-LINK",
       "EZLINK", "TRANSITLINK", "SIMPLYGO", "SMART TAXI", "CITYCAB", "PREMIER TAXI",
       "SHELL", "ESSO", "CALTEX", "SPC ", "SPC-", "ERP", "LTA ", "ONEMOTORING",
+      "BUS/MRT",
     ],
   },
   {
@@ -31,7 +32,7 @@ export const MERCHANT_RULES: MerchantRule[] = [
       "NETFLIX", "SPOTIFY", "DISNEY", "HBO GO", "YOUTUBE PREMIUM", "APPLE.COM/BILL",
       "APPLE MUSIC", "ICLOUD", "GOOGLE ONE", "GOOGLE PLAY", "AMAZON PRIME", "VIU",
       "MEWATCH", "STARHUB TV", "MICROSOFT 365", "OFFICE 365", "ADOBE", "GYMPASS",
-      "CLASSPASS",
+      "CLASSPASS", "FITBLOC",
     ],
   },
   {
@@ -39,7 +40,7 @@ export const MERCHANT_RULES: MerchantRule[] = [
     keywords: [
       "SP GROUP", "SP SERVICES", "SP DIGITAL", "SINGTEL", "STARHUB", "M1 LIMITED",
       "M1 POSTPAID", "CITY GAS", "CITYGAS", "PUB SINGAPORE", "MYREPUBLIC", "CIRCLES.LIFE",
-      "GIGA", "TPG TELECOM", "SIMBA",
+      "GIGA", "TPG TELECOM", "SIMBA", "AXS SERVICE",
     ],
   },
 ];
