@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getMonthlySummary, getMonthlyTrend } from "@/lib/queries/summary";
+import { listExpenses } from "@/lib/queries/expenses";
 import { centsToDisplay, currentMonth, monthLabel, shiftMonth } from "@/lib/utils";
 import CategoryPieChart from "@/components/charts/CategoryPieChart";
 import TrendChart from "@/components/charts/TrendChart";
@@ -14,6 +15,7 @@ export default async function ReportsPage({
   const params = await searchParams;
   const month = params.month ?? currentMonth();
   const summary = getMonthlySummary(month);
+  const monthExpenses = listExpenses({ month });
   const trend = getMonthlyTrend(6);
 
   return (
@@ -38,7 +40,8 @@ export default async function ReportsPage({
 
       <div className="rounded-xl border border-gray-200 bg-white p-6">
         <h2 className="font-medium mb-2">Category breakdown</h2>
-        <CategoryPieChart data={summary.by_category} />
+        <p className="text-xs text-gray-400 mb-2">Click a category to see its expenses</p>
+        <CategoryPieChart data={summary.by_category} expenses={monthExpenses} />
       </div>
 
       <div className="rounded-xl border border-gray-200 bg-white p-6">
