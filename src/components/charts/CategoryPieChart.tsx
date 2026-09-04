@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import type { CategoryBreakdownEntry, ExpenseWithCategory } from "@/types";
 import { centsToDisplay } from "@/lib/utils";
 import CategoryBadge from "@/components/categories/CategoryBadge";
@@ -30,6 +30,10 @@ export default function CategoryPieChart({
     color: entry.category_color,
   }));
 
+  function toggleCategory(id: number) {
+    setSelectedCategoryId((current) => (current === id ? null : id));
+  }
+
   const selected = data.find((c) => c.category_id === selectedCategoryId);
   const categoryExpenses = selected
     ? expenses.filter((e) => e.category_id === selected.category_id)
@@ -37,43 +41,57 @@ export default function CategoryPieChart({
 
   return (
     <div>
-      <ResponsiveContainer width="100%" height={260}>
-        <PieChart>
-          <Pie
-            data={chartData}
-            dataKey="value"
-            nameKey="name"
-            cx="50%"
-            cy="50%"
-            outerRadius={90}
-            label={(entry) => `$${centsToDisplay(entry.value as number)}`}
-            onClick={(_, index) =>
-              setSelectedCategoryId((current) =>
-                current === chartData[index].id ? null : chartData[index].id
-              )
-            }
-          >
-            {chartData.map((entry) => (
-              <Cell
-                key={entry.id}
-                fill={entry.color}
-                stroke={entry.id === selectedCategoryId ? "#111827" : "#ffffff"}
-                strokeWidth={entry.id === selectedCategoryId ? 2 : 1}
-                style={{ cursor: "pointer" }}
-              />
-            ))}
-          </Pie>
-          <Tooltip formatter={(value) => `$${centsToDisplay(Number(value))}`} />
-          <Legend
-            onClick={(_, index) =>
-              setSelectedCategoryId((current) =>
-                current === chartData[index].id ? null : chartData[index].id
-              )
-            }
-            wrapperStyle={{ cursor: "pointer" }}
-          />
-        </PieChart>
-      </ResponsiveContainer>
+      <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
+        <div className="w-full sm:flex-1 sm:min-w-0">
+          <ResponsiveContainer width="100%" height={220}>
+            <PieChart>
+              <Pie
+                data={chartData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={90}
+                onClick={(_, index) => toggleCategory(chartData[index].id)}
+              >
+                {chartData.map((entry) => (
+                  <Cell
+                    key={entry.id}
+                    fill={entry.color}
+                    stroke={entry.id === selectedCategoryId ? "#111827" : "#ffffff"}
+                    strokeWidth={entry.id === selectedCategoryId ? 2 : 1}
+                    style={{ cursor: "pointer" }}
+                  />
+                ))}
+              </Pie>
+              <Tooltip formatter={(value) => `$${centsToDisplay(Number(value))}`} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        <ul className="w-full sm:w-52 sm:shrink-0 space-y-1">
+          {chartData.map((entry) => (
+            <li key={entry.id}>
+              <button
+                type="button"
+                onClick={() => toggleCategory(entry.id)}
+                className={`w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-sm text-left hover:bg-gray-50 ${
+                  entry.id === selectedCategoryId ? "bg-gray-100" : ""
+                }`}
+              >
+                <span className="flex items-center gap-2 min-w-0">
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0"
+                    style={{ backgroundColor: entry.color }}
+                  />
+                  <span className="truncate text-gray-700">{entry.name}</span>
+                </span>
+                <span className="font-medium shrink-0">${centsToDisplay(entry.value)}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       {selected && (
         <div className="mt-4 border-t border-gray-100 pt-4">
