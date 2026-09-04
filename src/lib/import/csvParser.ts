@@ -41,25 +41,17 @@ function findColumn(headers: string[], aliases: string[]): string | undefined {
   return undefined;
 }
 
-function detectColumns(headers: string[]): ColumnMap {
+function tryDetectColumns(headers: string[]): ColumnMap | undefined {
   const date = findColumn(headers, HEADER_ALIASES.date);
   const description = findColumn(headers, HEADER_ALIASES.description);
-  if (!date || !description) {
-    throw new ImportParseError(
-      "Couldn't find a date and description column in this CSV — check that it's an unedited export from your bank."
-    );
-  }
+  if (!date || !description) return undefined;
 
   const debit = findColumn(headers, HEADER_ALIASES.debit);
   const credit = findColumn(headers, HEADER_ALIASES.credit);
   const amount = findColumn(headers, HEADER_ALIASES.amount);
   const type = findColumn(headers, HEADER_ALIASES.type);
 
-  if (!debit && !credit && !amount) {
-    throw new ImportParseError(
-      "Couldn't find an amount column (Debit/Credit or Amount) in this CSV — check that it's an unedited export from your bank."
-    );
-  }
+  if (!debit && !credit && !amount) return undefined;
 
   return { date, description, debit, credit, amount, type };
 }
@@ -68,24 +60,52 @@ export function parseCsvStatement(fileContent: string): {
   transactions: RawTransaction[];
   totalRowsDetected: number;
 } {
-  let records: Record<string, string>[];
+  let rows: string[][];
   try {
-    records = parse(fileContent, {
-      columns: true,
+    rows = parse(fileContent, {
+      columns: false,
       skip_empty_lines: true,
       trim: true,
       bom: true,
       relax_column_count: true,
-    }) as Record<string, string>[];
+    }) as string[][];
   } catch {
     throw new ImportParseError("Could not read this file as CSV.");
   }
 
-  if (records.length === 0) {
+  if (rows.length === 0) {
     throw new ImportParseError("No rows found in this CSV.");
   }
 
-  const columns = detectColumns(Object.keys(records[0]));
+  // Bank exports (e.g. POSB/DBS) often prefix the transaction table with
+  // account/balance summary rows, so the real header isn't necessarily row 0 —
+  // scan for the first row that actually looks like one instead of assuming it is.
+  let headerRowIndex = -1;
+  let columns: ColumnMap | undefined;
+  for (let i = 0; i < rows.length; i++) {
+    const candidate = tryDetectColumns(rows[i]);
+    if (candidate) {
+      headerRowIndex = i;
+      columns = candidate;
+      break;
+    }
+  }
+
+  if (!columns) {
+    throw new ImportParseError(
+      "Couldn't find a date, description, and amount column in this CSV — check that it's an unedited export from your bank."
+    );
+  }
+
+  const header = rows[headerRowIndex];
+  const records: Record<string, string>[] = rows.slice(headerRowIndex + 1).map((row) => {
+    const record: Record<string, string> = {};
+    header.forEach((h, idx) => {
+      record[h] = row[idx] ?? "";
+    });
+    return record;
+  });
+
   const transactions: RawTransaction[] = [];
 
   for (const record of records) {
