@@ -43,3 +43,65 @@ export function getMonthlyTrend(months: number): MonthlyTrendEntry[] {
     total_cents: totalsByMonth.get(month) ?? 0,
   }));
 }
+
+export interface CategoryTrendPoint {
+  month: string;
+  [key: string]: string | number;
+}
+
+export interface CategoryWithColor {
+  name: string;
+  color: string;
+}
+
+export function getCategoryTrend(months: number): {
+  data: CategoryTrendPoint[];
+  categories: CategoryWithColor[];
+} {
+  const monthList = lastNMonths(months);
+
+  const rows = db
+    .prepare(
+      `SELECT
+         substr(e.date, 1, 7) AS month,
+         c.name AS category_name,
+         c.color AS category_color,
+         SUM(e.amount_cents) AS total_cents
+       FROM expenses e
+       JOIN categories c ON c.id = e.category_id
+       WHERE substr(e.date, 1, 7) IN (${monthList.map(() => "?").join(",")})
+       GROUP BY month, c.id, c.name, c.color
+       ORDER BY month, c.name`
+    )
+    .all(...monthList) as Array<{
+    month: string;
+    category_name: string;
+    category_color: string;
+    total_cents: number;
+  }>;
+
+  const dataByMonth = new Map<string, Record<string, number>>();
+  const categoriesSet = new Set<string>();
+  const categoryColors = new Map<string, string>();
+
+  for (const row of rows) {
+    if (!dataByMonth.has(row.month)) {
+      dataByMonth.set(row.month, {});
+    }
+    dataByMonth.get(row.month)![row.category_name] = row.total_cents / 100;
+    categoriesSet.add(row.category_name);
+    categoryColors.set(row.category_name, row.category_color);
+  }
+
+  const categories = Array.from(categoriesSet).map((name) => ({
+    name,
+    color: categoryColors.get(name)!,
+  }));
+
+  const data = monthList.map((month) => ({
+    month,
+    ...dataByMonth.get(month),
+  }));
+
+  return { data, categories };
+}

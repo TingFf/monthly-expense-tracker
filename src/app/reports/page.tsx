@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { getMonthlySummary, getMonthlyTrend } from "@/lib/queries/summary";
+import { getMonthlySummary, getMonthlyTrend, getCategoryTrend } from "@/lib/queries/summary";
 import { listExpenses } from "@/lib/queries/expenses";
 import { centsToDisplay, currentMonth, monthLabel, shiftMonth } from "@/lib/utils";
 import CategoryPieChart from "@/components/charts/CategoryPieChart";
 import TrendChart from "@/components/charts/TrendChart";
+import CategoryTrendChart from "@/components/charts/CategoryTrendChart";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,7 @@ export default async function ReportsPage({
   const summary = getMonthlySummary(month);
   const monthExpenses = listExpenses({ month });
   const trend = getMonthlyTrend(6);
+  const categoryTrend = getCategoryTrend(6);
 
   return (
     <div className="space-y-6">
@@ -47,6 +49,11 @@ export default async function ReportsPage({
       <div className="rounded-xl border border-gray-200 bg-white p-6">
         <h2 className="font-medium mb-2">Last 6 months</h2>
         <TrendChart data={trend} />
+      </div>
+
+      <div className="rounded-xl border border-gray-200 bg-white p-6">
+        <h2 className="font-medium mb-2">Category trends (last 6 months)</h2>
+        <CategoryTrendChart data={categoryTrend.data} categories={categoryTrend.categories} />
       </div>
     </div>
   );
