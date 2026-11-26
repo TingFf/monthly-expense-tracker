@@ -40,4 +40,4 @@ Single Next.js App Router project (no separate backend). Server Components read 
 
 ## GitHub
 
-The repo is pushed to `https://github.com/angfamilyxd/monthly-expense-tracker` (private), via the `gh` CLI already authenticated as `angfamilyxd`.
+The repo is pushed to `https://github.com/TingFf/monthly-expense-tracker` (private), via the `gh` CLI already authenticated as `angfamilyxd`.
