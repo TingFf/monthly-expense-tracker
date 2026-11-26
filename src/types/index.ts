@@ -7,6 +7,19 @@ export interface Category {
   created_at: string;
 }
 
+export interface CategoryKeyword {
+  id: number;
+  keyword: string;
+  category_id: number;
+  created_at: string;
+}
+
+export interface CategoryKeywordWithCategory extends CategoryKeyword {
+  category_name: string;
+  category_color: string;
+  category_icon: string | null;
+}
+
 export type PaymentMethod = "cash" | "card" | "bank_transfer" | "other";
 
 export interface Expense {

@@ -28,6 +28,16 @@ CREATE TABLE IF NOT EXISTS monthly_income (
   updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- User-defined import rules: if an imported transaction's description contains `keyword`
+-- (case-insensitive substring), it is auto-assigned to `category_id`. Checked before the
+-- built-in merchant rules in src/lib/import/merchantRules.ts.
+CREATE TABLE IF NOT EXISTS category_keywords (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  keyword      TEXT NOT NULL UNIQUE COLLATE NOCASE,
+  category_id  INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 INSERT OR IGNORE INTO categories (name, color, icon, is_default) VALUES
   ('Food', '#F59E0B', '🍔', 1),
   ('Transport', '#3B82F6', '🚌', 1),

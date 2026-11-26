@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAllCategories } from "@/lib/queries/categories";
 import { expenseExists } from "@/lib/queries/expenses";
+import { getAllKeywords } from "@/lib/queries/keywords";
 import { parseCsvStatement } from "@/lib/import/csvParser";
 import { parsePdfStatement } from "@/lib/import/pdfParser";
 import { categorizeDescription } from "@/lib/import/merchantRules";
@@ -48,9 +49,10 @@ export async function POST(request: NextRequest) {
 
   const debitRows = raw.transactions.filter((t) => t.direction === "debit");
   const categories = getAllCategories();
+  const userKeywords = getAllKeywords();
 
   const transactions: ParsedTransaction[] = debitRows.map((t, row_index) => {
-    const { categoryId, categoryName } = categorizeDescription(t.description, categories);
+    const { categoryId, categoryName } = categorizeDescription(t.description, categories, userKeywords);
     const duplicate = expenseExists(t.date, t.amount_cents, t.description);
     return {
       row_index,

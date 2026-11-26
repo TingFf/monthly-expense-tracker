@@ -1,4 +1,4 @@
-import type { Category } from "@/types";
+import type { Category, CategoryKeyword } from "@/types";
 
 export interface MerchantRule {
   category: string; // must match an existing categories.name
@@ -47,12 +47,30 @@ export const MERCHANT_RULES: MerchantRule[] = [
 
 const FALLBACK_CATEGORY_NAME = "Etc";
 
+/**
+ * Picks a category for an imported transaction. User-saved keywords (from the Categories page)
+ * win over the built-in MERCHANT_RULES; among user keywords the longest match wins, so a
+ * specific rule like "GRAB FOOD" beats a broader one like "GRAB".
+ */
 export function categorizeDescription(
   description: string,
-  categories: Category[]
+  categories: Category[],
+  userKeywords: Pick<CategoryKeyword, "keyword" | "category_id">[] = []
 ): { categoryId: number; categoryName: string } {
   const normalized = description.toUpperCase();
   const fallback = categories.find((c) => c.name === FALLBACK_CATEGORY_NAME);
+
+  let bestUserMatch: { categoryId: number; length: number } | null = null;
+  for (const { keyword, category_id } of userKeywords) {
+    const kw = keyword.trim().toUpperCase();
+    if (kw && normalized.includes(kw) && (!bestUserMatch || kw.length > bestUserMatch.length)) {
+      bestUserMatch = { categoryId: category_id, length: kw.length };
+    }
+  }
+  if (bestUserMatch) {
+    const match = categories.find((c) => c.id === bestUserMatch.categoryId);
+    if (match) return { categoryId: match.id, categoryName: match.name };
+  }
 
   for (const rule of MERCHANT_RULES) {
     if (rule.keywords.some((kw) => normalized.includes(kw))) {

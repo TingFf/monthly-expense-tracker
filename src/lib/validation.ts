@@ -28,6 +28,11 @@ export const setIncomeSchema = z.object({
   amount_cents: z.number().int().nonnegative(),
 });
 
+export const createCategoryKeywordSchema = z.object({
+  keyword: z.string().trim().min(1, "Keyword is required").max(100),
+  category_id: z.number().int().positive(),
+});
+
 export const importCommitSchema = z.object({
   items: z.array(createExpenseSchema).min(1).max(1000),
 });
@@ -38,3 +43,4 @@ export type CreateCategoryInput = z.infer<typeof createCategorySchema>;
 export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>;
 export type ImportCommitInput = z.infer<typeof importCommitSchema>;
 export type SetIncomeInput = z.infer<typeof setIncomeSchema>;
+export type CreateCategoryKeywordInput = z.infer<typeof createCategoryKeywordSchema>;
